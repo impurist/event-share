@@ -9,7 +9,10 @@
     "publish": "tsx src/publish.ts",
     "start": "tsx src/subscribe.ts",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:pact": "vitest run --config vitest.pact.config.ts",
+    "verify:provider": "tsx src/verify-provider-contract.ts",
+    "cross-check": "tsx cross-check.ts"
   },
   "dependencies": {
     "ajv": "^8.17.1",
@@ -18,6 +21,7 @@
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {
+    "@pact-foundation/pact": "^17.0.0",
     "@types/amqplib": "^0.10.5",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^26.0.0",

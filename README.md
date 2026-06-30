@@ -151,12 +151,15 @@ npx -y @asyncapi/cli generate html asyncapi.yaml -o ./docs
 ## Project layout
 
 ```
-asyncapi.yaml          AsyncAPI 3.0 contract — the source of truth
+asyncapi.yaml          AsyncAPI 3.0 contract — the source of truth (also the BDCT provider contract)
 mise.toml              Pinned Ruby / Node versions — the toolchain source of truth
 docker-compose.yml     RabbitMQ + both services
 sample-events/         Example event payloads (incl. one invalid)
-ruby-service/          Ruby publisher + subscriber (bunny, json_schemer, zeitwerk) + RSpec specs
-ts-service/            TypeScript publisher + subscriber (amqplib, ajv) + Vitest tests
+pact/                  PactFlow BDCT tooling — publish / can-i-deploy / cross-check scripts (env-driven)
+ruby-service/          Ruby publisher + subscriber (bunny, json_schemer, zeitwerk) + RSpec
+                       bin/verify_provider_contract.rb · bin/generate_consumer_pact.rb
+ts-service/            TypeScript publisher + subscriber (amqplib, ajv) + Vitest
+                       src/verify-provider-contract.ts · test/pact/ · cross-check.ts
 ```
 
 ## Toolchain versions
@@ -200,6 +203,77 @@ SUBSCRIBE_PATTERN='events.#' npm run subscribe         # consumer
 npm run publish -- ../sample-events/london-jazz.json   # publisher
 ```
 
-> **Note:** This example is intentionally focused on the AsyncAPI contract and
-> topic-routing mechanics. Using the same contract to drive **PactFlow** message
-> contract testing is a planned follow-up and is out of scope here.
+## PactFlow Bi-Directional Contract Testing (AsyncAPI)
+
+This example drives **PactFlow BDCT** using `asyncapi.yaml` as the **provider
+contract**. The artifacts and scripts live under [`pact/`](./pact); everything
+runs locally, and publishing to a tenant is env-driven (you supply the creds).
+
+> **Pilot note:** Standard PactFlow BDCT is OpenAPI/HTTP-only; **AsyncAPI provider
+> contracts are a PactFlow pilot** ([roadmap #57](https://github.com/pactflow/roadmap/issues/57)).
+> The provider contract is published with `--specification asyncapi`, and the
+> consumer message pacts are **Pact v4** (`Asynchronous/Messages`). The pact↔channel
+> metadata is the best-known mechanism — marked **PILOT HOOK** in the scripts/tests
+> to adjust to the live pilot.
+
+### The model — full symmetric
+
+Both services are **both** a provider and a consumer. Two pacticipants:
+
+| Pacticipant | As **provider** (AsyncAPI contract + self-verification) | As **consumer** (message pact → provider) |
+| --- | --- | --- |
+| `ruby-service` | `asyncapi.yaml`, verified by its publisher | message pact → **`ts-service`** |
+| `ts-service`   | `asyncapi.yaml`, verified by its publisher | message pact → **`ruby-service`** |
+
+- **Provider self-verification** proves each publisher emits messages that conform
+  to `asyncapi.yaml` (reuses `Validator` + `Publisher` + the sample events). Its
+  exit code is attached to the published provider contract — the messaging analogue
+  of the OAS verification step in BDCT.
+- **Consumer message pacts** declare the fields each subscriber relies on (type
+  matchers) and run the example through the real handler (`Subscriber.classify`).
+  TS uses `@pact-foundation/pact`; Ruby emits a spec-compliant Pact v3 message pact
+  directly (the official `pact-message-ruby` consumer DSL is unmaintained).
+- **Cross-contract validation** (consumer message ⊆ AsyncAPI provider contract) is
+  what PactFlow does server-side on `can-i-deploy`. [`pact/cross-check.sh`](./pact/cross-check.sh)
+  reproduces it **locally** so the whole loop is demonstrable before any tenant call.
+
+### Run it locally (no broker, no credentials)
+
+```bash
+# 1. Provider self-verification — each publisher conforms to asyncapi.yaml
+./pact/verify-provider-contracts.sh
+
+# 2. Generate the consumer message pacts → each service's pacts/
+(cd ts-service && npm run test:pact)
+(cd ruby-service && ruby bin/generate_consumer_pact.rb)   # needs Ruby 4.0.x (mise) or run via Docker
+
+# 3. Cross-check: do the consumer pacts satisfy the AsyncAPI provider contract?
+./pact/cross-check.sh
+```
+
+> Ruby tooling needs the pinned Ruby 4.0.x (`mise install`). Without it, run any
+> Ruby step in the container, e.g.:
+> ```bash
+> docker compose run --rm --no-deps -v "$PWD:/work" -w /work/ruby-service ruby-service \
+>   ruby bin/generate_consumer_pact.rb
+> ```
+
+### Publish to PactFlow + can-i-deploy (env-driven)
+
+```bash
+cp pact/.env.example pact/.env     # then fill in PACT_BROKER_BASE_URL + PACT_BROKER_TOKEN
+./pact/publish-provider-contracts.sh   # publishes asyncapi.yaml (x2) with self-verification results
+./pact/publish-consumer-pacts.sh       # publishes both consumer message pacts
+./pact/can-i-deploy.sh                 # PactFlow cross-validates + answers safe-to-deploy
+./pact/record-deployment.sh            # after a successful deploy
+```
+
+Every script honours `DRY_RUN=1` to print the exact commands without executing
+them, and uses the `pactfoundation/pact-cli` Docker image so no CLI install is
+needed. See [`pact/`](./pact) for details.
+
+---
+
+> This BDCT layer sits on top of the runtime example below it — the same
+> `asyncapi.yaml` is the contract for the live RabbitMQ services *and* the
+> provider contract published to PactFlow.

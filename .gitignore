@@ -1,0 +1,17 @@
+# dependencies
+**/node_modules/
+ruby-service/.bundle/
+ruby-service/vendor/bundle/
+
+# generated AsyncAPI docs
+ts-service/docs/
+docs/
+
+# generated Pact contracts (published to the broker, not committed)
+**/pacts/
+
+# local secrets / env
+pact/.env
+pact/.env.local
+.env
+.env.local
