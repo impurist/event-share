@@ -1,0 +1,13 @@
+{
+  "id": "0d5e9a1c-2b34-4f78-9c61-8a7d3e0f4b29",
+  "artist": "Anonymous Session",
+  "genre": "jazz",
+  "location": {
+    "city": "London",
+    "venue": "Pop-up Cellar",
+    "country": "United Kingdom"
+  },
+  "startsAt": "not-a-real-date",
+  "submittedBy": "user_99",
+  "submittedAt": "2026-06-30T13:30:00Z"
+}

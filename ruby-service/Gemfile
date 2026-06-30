@@ -1,0 +1,18 @@
+source 'https://rubygems.org'
+
+# Matches the Ruby pinned in mise.toml at the repo root.
+ruby '~> 4.0'
+
+# Autoloading by naming convention (no manual require_relative).
+gem 'zeitwerk', '~> 2.6'
+
+# AMQP 0-9-1 client for RabbitMQ
+gem 'bunny', '~> 2.23'
+
+# JSON Schema validation — used to validate messages against the schema
+# defined in ../asyncapi.yaml (the source of truth).
+gem 'json_schemer', '~> 2.3'
+
+group :test do
+  gem 'rspec', '~> 3.13'
+end

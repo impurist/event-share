@@ -1,0 +1,19 @@
+{
+  "id": "c91f0a2d-5e64-4b18-8d7a-3f9c2b6e1a44",
+  "title": "Camden Riffs",
+  "artist": "The Brick Lane Four",
+  "genre": "rock",
+  "location": {
+    "city": "London",
+    "venue": "The Roundhouse",
+    "country": "GB"
+  },
+  "startsAt": "2026-07-20T19:30:00Z",
+  "endsAt": "2026-07-20T22:30:00Z",
+  "price": {
+    "amount": 3200,
+    "currency": "GBP"
+  },
+  "submittedBy": "user_88",
+  "submittedAt": "2026-06-30T11:00:00Z"
+}

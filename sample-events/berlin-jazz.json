@@ -1,0 +1,18 @@
+{
+  "id": "a72d6e4b-1c83-49f5-9a2e-7b0c5d1e8f30",
+  "title": "Kreuzberg Jazz Nights",
+  "artist": "Trio Improviso",
+  "genre": "jazz",
+  "location": {
+    "city": "Berlin",
+    "venue": "A-Trane",
+    "country": "DE"
+  },
+  "startsAt": "2026-08-03T21:00:00Z",
+  "price": {
+    "amount": 1800,
+    "currency": "EUR"
+  },
+  "submittedBy": "user_17",
+  "submittedAt": "2026-06-30T10:15:00Z"
+}

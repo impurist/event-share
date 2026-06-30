@@ -1,0 +1,42 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: music-rabbitmq
+    ports:
+      - "5672:5672"     # AMQP
+      - "15672:15672"   # Management UI (guest / guest)
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  ruby-service:
+    build: ./ruby-service
+    container_name: music-ruby-service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      SPEC_PATH: /app/asyncapi.yaml
+      # Ruby subscribes to EVERYTHING IN LONDON (any genre).
+      SUBSCRIBE_PATTERN: events.london.#
+    volumes:
+      - ./asyncapi.yaml:/app/asyncapi.yaml:ro
+      - ./sample-events:/app/sample-events:ro
+
+  ts-service:
+    build: ./ts-service
+    container_name: music-ts-service
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      SPEC_PATH: /app/asyncapi.yaml
+      # TypeScript subscribes to JAZZ ANYWHERE (any city).
+      SUBSCRIBE_PATTERN: events.*.jazz
+    volumes:
+      - ./asyncapi.yaml:/app/asyncapi.yaml:ro
+      - ./sample-events:/app/sample-events:ro
