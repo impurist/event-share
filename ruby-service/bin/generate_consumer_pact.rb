@@ -18,8 +18,8 @@ require 'json'
 require 'fileutils'
 require_relative '../boot'
 
-CONSUMER = 'ruby-service'
-PROVIDER = 'ts-service'
+CONSUMER = 'event-share-broker-service'
+PROVIDER = 'event-share-user-service'
 SPEC_PATH = ENV.fetch('SPEC_PATH', File.expand_path('../../asyncapi.yaml', __dir__))
 PACTS_DIR = ENV.fetch('PACTS_DIR', File.expand_path('../pacts', __dir__))
 
@@ -71,11 +71,14 @@ pact = {
       },
       'matchingRules' => { 'body' => matching_rules },
       'metadata' => {
-        'contentType' => 'application/json',
-        # PILOT HOOK: how PactFlow links a message pact to an AsyncAPI channel/operation
-        # is pilot-specific. Adjust these keys to whatever the AsyncAPI-BDCT pilot expects.
-        'channel' => 'music.events',
-        'routingKey' => 'events.london.jazz'
+        'contentType' => 'application/json'
+      },
+      # Links this interaction to the AsyncAPI operation it consumes, so PactFlow
+      # can cross-validate it against the provider's AsyncAPI contract.
+      'comments' => {
+        'references' => {
+          'AsyncAPI' => { 'operation' => 'publishMusicEvent' }
+        }
       }
     }
   ],

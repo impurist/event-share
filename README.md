@@ -209,21 +209,19 @@ This example drives **PactFlow BDCT** using `asyncapi.yaml` as the **provider
 contract**. The artifacts and scripts live under [`pact/`](./pact); everything
 runs locally, and publishing to a tenant is env-driven (you supply the creds).
 
-> **Pilot note:** Standard PactFlow BDCT is OpenAPI/HTTP-only; **AsyncAPI provider
-> contracts are a PactFlow pilot** ([roadmap #57](https://github.com/pactflow/roadmap/issues/57)).
-> The provider contract is published with `--specification asyncapi`, and the
-> consumer message pacts are **Pact v4** (`Asynchronous/Messages`). The pact↔channel
-> metadata is the best-known mechanism — marked **PILOT HOOK** in the scripts/tests
-> to adjust to the live pilot.
+> The provider contract is published with `--specification asyncapi` plus its
+> self-verification results; the consumer message pacts are **Pact v4**
+> (`Asynchronous/Messages`).
 
 ### The model — full symmetric
 
-Both services are **both** a provider and a consumer. Two pacticipants:
+Both services are **both** a provider and a consumer. Two PactFlow pacticipants
+(contract identities, distinct from the service directories):
 
-| Pacticipant | As **provider** (AsyncAPI contract + self-verification) | As **consumer** (message pact → provider) |
+| Pacticipant (service dir) | As **provider** (AsyncAPI contract + self-verification) | As **consumer** (message pact → provider) |
 | --- | --- | --- |
-| `ruby-service` | `asyncapi.yaml`, verified by its publisher | message pact → **`ts-service`** |
-| `ts-service`   | `asyncapi.yaml`, verified by its publisher | message pact → **`ruby-service`** |
+| `event-share-broker-service` (`ruby-service`) | `asyncapi.yaml`, verified by its publisher | message pact → **`event-share-user-service`** |
+| `event-share-user-service` (`ts-service`)   | `asyncapi.yaml`, verified by its publisher | message pact → **`event-share-broker-service`** |
 
 - **Provider self-verification** proves each publisher emits messages that conform
   to `asyncapi.yaml` (reuses `Validator` + `Publisher` + the sample events). Its
@@ -269,8 +267,10 @@ cp pact/.env.example pact/.env     # then fill in PACT_BROKER_BASE_URL + PACT_BR
 ```
 
 Every script honours `DRY_RUN=1` to print the exact commands without executing
-them, and uses the `pactfoundation/pact-cli` Docker image so no CLI install is
-needed. See [`pact/`](./pact) for details.
+them, and uses the consolidated [`pact` CLI](https://github.com/pact-foundation/pact-cli)
+via its `pactfoundation/pact` Docker image so no CLI install is needed.
+
+**→ Full step-by-step workflow with commands: [`pact/README.md`](./pact/README.md)**
 
 ---
 

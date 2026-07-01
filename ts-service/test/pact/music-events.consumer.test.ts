@@ -14,17 +14,18 @@ const PACT_DIR = fileURLToPath(new URL('../../pacts', import.meta.url));
 // The pact passes only if the consumer can successfully process the message.
 const subscriber = new Subscriber({} as Connection, new Validator(SPEC_PATH), 'events.#');
 
-describe('ts-service consumes MusicEventPublished from ruby-service', () => {
+describe('event-share-user-service consumes MusicEventPublished from event-share-broker-service', () => {
   // PactV4 → Pact Specification v4 (Asynchronous/Messages interactions).
   const pact = new PactV4({
-    consumer: 'ts-service',
-    provider: 'ruby-service',
+    consumer: 'event-share-user-service',
+    provider: 'event-share-broker-service',
     dir: PACT_DIR,
   });
 
   it('can handle a MusicEventPublished event', () => {
     return pact
       .addAsynchronousInteraction()
+      .reference('AsyncAPI', 'operationId', 'publishMusicEvent')
       .expectsToReceive('a MusicEventPublished event', (builder) => {
         builder
           // Only the fields this subscriber relies on, as type matchers. Example
@@ -43,14 +44,7 @@ describe('ts-service consumes MusicEventPublished from ruby-service', () => {
             submittedBy: like('user_42'),
             submittedAt: like('2026-06-30T09:00:00Z'),
           })
-          // PILOT HOOK: how PactFlow links a message pact to an AsyncAPI channel/operation
-          // is pilot-specific. These keys identify the exchange + a representative routing
-          // key; adjust to whatever the AsyncAPI-BDCT pilot expects.
-          .withMetadata({
-            contentType: 'application/json',
-            channel: 'music.events',
-            routingKey: 'events.london.jazz',
-          });
+          .withMetadata({ contentType: 'application/json' });
       })
       .executeTest(async (message) => {
         const result = subscriber.classify(JSON.stringify(message.contents.content));

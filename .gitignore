@@ -10,6 +10,9 @@ docs/
 # generated Pact contracts (published to the broker, not committed)
 **/pacts/
 
+# transient self-verification output attached to provider contracts
+pact/.verification-*.txt
+
 # local secrets / env
 pact/.env
 pact/.env.local
