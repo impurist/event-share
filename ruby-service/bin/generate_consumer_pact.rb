@@ -77,7 +77,7 @@ pact = {
       # can cross-validate it against the provider's AsyncAPI contract.
       'comments' => {
         'references' => {
-          'AsyncAPI' => { 'operation' => 'publishMusicEvent' }
+          'AsyncAPI' => { 'operationId' => 'publishMusicEvent' }
         }
       }
     }

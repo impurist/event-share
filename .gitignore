@@ -18,3 +18,4 @@ pact/.env
 pact/.env.local
 .env
 .env.local
+ts-service/.DS_Store

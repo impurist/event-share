@@ -1,7 +1,7 @@
 # Music Performance Event Sharing — an AsyncAPI example
 
 A small, runnable **event-driven** example described by a single
-[AsyncAPI 3.0](./asyncapi.yaml) document.
+[AsyncAPI 3.1](./asyncapi.yaml) document.
 
 Users submit live-music performance events. Each event is **published** to a
 RabbitMQ **topic exchange** with a routing key built from its **location** and
@@ -28,7 +28,7 @@ Two services — one **Ruby**, one **TypeScript** — each both **publish** and
 
 [`asyncapi.yaml`](./asyncapi.yaml) defines the `music.events` topic exchange, the
 `events.{city}.{genre}` channel address, the `send`/`receive` operations, and the
-`MusicEvent` payload schema (AsyncAPI 3.0.0 + AMQP binding 0.3.0).
+`MusicEvent` payload schema (AsyncAPI 3.1.0 + AMQP binding 0.3.0).
 
 Neither service hand-copies the schema. At runtime each one **loads
 `asyncapi.yaml` and validates against it** — Ruby via
@@ -151,7 +151,7 @@ npx -y @asyncapi/cli generate html asyncapi.yaml -o ./docs
 ## Project layout
 
 ```
-asyncapi.yaml          AsyncAPI 3.0 contract — the source of truth (also the BDCT provider contract)
+asyncapi.yaml          AsyncAPI 3.1 contract — the source of truth (also the BDCT provider contract)
 mise.toml              Pinned Ruby / Node versions — the toolchain source of truth
 docker-compose.yml     RabbitMQ + both services
 sample-events/         Example event payloads (incl. one invalid)

@@ -12,9 +12,11 @@
     "test:watch": "vitest",
     "test:pact": "vitest run --config vitest.pact.config.ts",
     "verify:provider": "tsx src/verify-provider-contract.ts",
-    "cross-check": "tsx cross-check.ts"
+    "cross-check": "tsx cross-check.ts",
+    "validate-schema": "asyncapi validate ../asyncapi.yaml"
   },
   "dependencies": {
+    "@asyncapi/cli": "^6.0.2",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "amqplib": "^0.10.4",
