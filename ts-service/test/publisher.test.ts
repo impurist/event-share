@@ -18,7 +18,7 @@ describe('Publisher', () => {
   });
 
   it('publishes a valid event with the derived routing key and returns it', () => {
-    const key = publisher.publish(loadSample<MusicEvent>('london-jazz'));x
+    const key = publisher.publish(loadSample<MusicEvent>('london-jazz'));
 
     expect(key).toBe('events.london.jazz');
     expect(publish).toHaveBeenCalledTimes(1);
